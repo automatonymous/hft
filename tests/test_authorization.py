@@ -1,6 +1,6 @@
 import pytest
 import requests
-from authorization import CoinbaseExchangeAuth
+from lib.authorization import CoinbaseExchangeAuth
 
 
 def test_CoinbaseExchangeAuth():
