@@ -102,11 +102,38 @@ def stop_order(side, product, price, size, unit):
     return place_order(**args)
 
 
-if __name__ == '__main__':
-    rslt = limit_order(
-        'sell',
-        'BCH-USD',
-        '3000.00',
-        '0.0001',
+def cancel_order(order_id):
+    """Cancels an order
+
+    Args:
+      order_id -> str : An order_id
+
+    Returns:
+      int : Status code, e.g. 200
+    """
+    auth = CoinbaseExchangeAuth()
+    response = requests.delete(
+        f"{env['GDAX_URL']}/orders/{order_id}",
+        auth=auth
     )
-    print(rslt)
+    return response.status_code
+
+
+def cancel_all(product=None):
+    """Cancels all orders, or all for a given product
+
+    Args:
+      product -> str or None : A particular currency for which to cancel orders
+
+    Returns:
+      int : Status code, e.g. 200
+    """
+    auth = CoinbaseExchangeAuth()
+    req_body = {product_id: product} if product else {}
+    response = requests.delete(
+        f"{env['GDAX_URL']}/orders",
+        data=dumps(req_body),
+        auth=auth
+    )
+    return response.status_code
+
