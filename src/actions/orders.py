@@ -1,14 +1,16 @@
-from src.authorization import CoinbaseExchangeAuth
-import requests
+from os import environ as env
 from json import dumps
 from uuid import uuid4
-from os import environ as env
+import asyncio
+
+from src.authorization import CoinbaseExchangeAuth
 
 
-def place_order(**kwargs):
+async def place_order(session, **kwargs):
     """Generic function for placing orders
 
     Args:
+      session -> aiohttp.ClientSession : An aiohttp client session
       **kwargs -> dict : necessary arguments for placing orders
 
     Returns:
@@ -21,18 +23,19 @@ def place_order(**kwargs):
         client_oid=client_oid,
         stp='co'
     ))
-    response = requests.post(
+    response = await session.post(
         env['GDAX_URL']+'orders',
         data=dumps(request_body),
         auth=auth
     )
-    return {client_oid:response.json()}
+    return await {client_oid:response.json()}
 
 
-def market_order(side, product, size, unit):
+async def market_order(session, side, product, size, unit):
     """Places market order with the given attributes.
 
     Args:
+      session -> aiohttp.ClientSession : An aiohttp client session
       side -> str : 'buy' or 'sell'
       product -> str : Pair of currencies to exchange, e.g. 'BTC-USD'
       size -> str : Quantity of the order, as specified by 'unit'
@@ -47,14 +50,15 @@ def market_order(side, product, size, unit):
         'product_id': product,
         unit: size
     }
-    return place_order(**args)
+    return await place_order(sesion, **args)
 
 
-def limit_order(side, product, price, size,
+async def limit_order(session, side, product, price, size,
                 tif='GTC', cancel_after=None, post_only=None):
     """Places limit order with the given attributes.
 
     Args:
+      session -> aiohttp.ClientSession : An aiohttp client session
       side -> str : 'buy' or 'sell'
       product -> str : Pair of currencies to exchange, e.g. 'BTC-USD'
       price -> str : Price per currency
@@ -77,13 +81,14 @@ def limit_order(side, product, price, size,
         'post_only': post_only
     }
     args = {k:v for k,v in args.items() if v}
-    return place_order(**args)
+    return await place_order(session, **args)
 
 
-def stop_order(side, product, price, size, unit):
+async def stop_order(session, side, product, price, size, unit):
     """Places stop order with the given attributes.
 
     Args:
+      session -> aiohttp.ClientSession : An aiohttp client session
       side -> str : 'buy' or 'sell'
       product -> str : Pair of currencies to exchange, e.g. 'BTC-USD'
       price -> str : Price at which the stop order triggers
@@ -94,35 +99,37 @@ def stop_order(side, product, price, size, unit):
       dict : order_id => response message
     """
     args = {
-        'type': 'market',
+        'type': 'stop',
         'side': side,
         'product_id': product,
         unit: size
     }
-    return place_order(**args)
+    return await place_order(session, **args)
 
 
-def cancel_order(order_id):
+async def cancel_order(session, order_id):
     """Cancels an order
 
     Args:
+      session -> aiohttp.ClientSession : An aiohttp client session
       order_id -> str : An order_id
 
     Returns:
       int : Status code, e.g. 200
     """
     auth = CoinbaseExchangeAuth()
-    response = requests.delete(
+    response = await session.delete(
         f"{env['GDAX_URL']}/orders/{order_id}",
         auth=auth
     )
-    return response.status_code
+    return await response.status_code
 
 
-def cancel_all(product=None):
+aync def cancel_all(session, product=None):
     """Cancels all orders, or all for a given product
 
     Args:
+      session -> aiohttp.ClientSession : An aiohttp client session
       product -> str or None : A particular currency for which to cancel orders
 
     Returns:
@@ -130,10 +137,10 @@ def cancel_all(product=None):
     """
     auth = CoinbaseExchangeAuth()
     req_body = {product_id: product} if product else {}
-    response = requests.delete(
+    response = await session.delete(
         f"{env['GDAX_URL']}/orders",
         data=dumps(req_body),
         auth=auth
     )
-    return response.status_code
+    return await response.status_code
 
