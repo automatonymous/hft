@@ -3,20 +3,18 @@ from json import dumps
 from uuid import uuid4
 import asyncio
 
-from src.authorization import CoinbaseExchangeAuth
 
-
-async def place_order(session, **kwargs):
+async def place_order(auth, session, **kwargs):
     """Generic function for placing orders
 
     Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
       session -> aiohttp.ClientSession : An aiohttp client session
       **kwargs -> dict : necessary arguments for placing orders
 
     Returns:
       dict : order_id => response message
     """
-    auth = CoinbaseExchangeAuth()
     request_body = kwargs
     client_oid = uuid4().hex
     request_body.update(dict(
@@ -31,10 +29,11 @@ async def place_order(session, **kwargs):
     return await {client_oid:response.json()}
 
 
-async def market_order(session, side, product, size, unit):
+async def market_order(auth, session, side, product, size, unit):
     """Places market order with the given attributes.
 
     Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
       session -> aiohttp.ClientSession : An aiohttp client session
       side -> str : 'buy' or 'sell'
       product -> str : Pair of currencies to exchange, e.g. 'BTC-USD'
@@ -50,14 +49,15 @@ async def market_order(session, side, product, size, unit):
         'product_id': product,
         unit: size
     }
-    return await place_order(sesion, **args)
+    return await place_order(auth, session, **args)
 
 
-async def limit_order(session, side, product, price, size,
+async def limit_order(auth, session, side, product, price, size,
                 tif='GTC', cancel_after=None, post_only=None):
     """Places limit order with the given attributes.
 
     Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
       session -> aiohttp.ClientSession : An aiohttp client session
       side -> str : 'buy' or 'sell'
       product -> str : Pair of currencies to exchange, e.g. 'BTC-USD'
@@ -81,13 +81,14 @@ async def limit_order(session, side, product, price, size,
         'post_only': post_only
     }
     args = {k:v for k,v in args.items() if v}
-    return await place_order(session, **args)
+    return await place_order(auth, session, **args)
 
 
-async def stop_order(session, side, product, price, size, unit):
+async def stop_order(auth, session, side, product, price, size, unit):
     """Places stop order with the given attributes.
 
     Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
       session -> aiohttp.ClientSession : An aiohttp client session
       side -> str : 'buy' or 'sell'
       product -> str : Pair of currencies to exchange, e.g. 'BTC-USD'
@@ -104,20 +105,20 @@ async def stop_order(session, side, product, price, size, unit):
         'product_id': product,
         unit: size
     }
-    return await place_order(session, **args)
+    return await place_order(auth, session, **args)
 
 
-async def cancel_order(session, order_id):
+async def cancel_order(auth, session, order_id):
     """Cancels an order
 
     Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
       session -> aiohttp.ClientSession : An aiohttp client session
       order_id -> str : An order_id
 
     Returns:
       int : Status code, e.g. 200
     """
-    auth = CoinbaseExchangeAuth()
     response = await session.delete(
         f"{env['GDAX_URL']}/orders/{order_id}",
         auth=auth
@@ -125,17 +126,17 @@ async def cancel_order(session, order_id):
     return await response.status_code
 
 
-aync def cancel_all(session, product=None):
+aync def cancel_all(auth, session, product=None):
     """Cancels all orders, or all for a given product
 
     Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
       session -> aiohttp.ClientSession : An aiohttp client session
       product -> str or None : A particular currency for which to cancel orders
 
     Returns:
       int : Status code, e.g. 200
     """
-    auth = CoinbaseExchangeAuth()
     req_body = {product_id: product} if product else {}
     response = await session.delete(
         f"{env['GDAX_URL']}/orders",

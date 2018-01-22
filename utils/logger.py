@@ -1,11 +1,12 @@
 import logging
+import asyncio
 
-
-def log(msg, level='info'):
-    logging.basicConfig(
-        format='%(asctime)s --- %(message)s',
-        datefmt='%m/%d/%Y %I:%M:%S %p',
-        level=logging.INFO
-    )
-    getattr(logging, level)(msg)
+logging.basicConfig(
+    format='%(asctime)s --- %(message)s',
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    level=logging.INFO
+)
+# TODO ensure logging is actually asynchronous
+async def log(msg, level='info'):
+    await getattr(logging, level)(msg)
 
