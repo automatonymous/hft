@@ -1,5 +1,5 @@
 from src.data_structures import MsgQueue
-from src.order_book.order_book import OrderBook
+from src.order_book import OrderBook
 from src.strategies.print_stuff import PrintStuff
 from src.trader import Trader
 

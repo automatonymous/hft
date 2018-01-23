@@ -13,5 +13,4 @@ class PrintStuff(Strategy):
                 await log(f"Reading msg {msg['type']}")
             except IndexError:
                 continue
-            print(msg['type'])
 
