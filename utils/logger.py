@@ -8,5 +8,5 @@ logging.basicConfig(
 )
 # TODO ensure logging is actually asynchronous
 async def log(msg, level='info'):
-    await getattr(logging, level)(msg)
+    getattr(logging, level)(msg)
 

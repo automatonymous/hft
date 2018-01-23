@@ -26,7 +26,7 @@ async def place_order(auth, session, **kwargs):
         data=dumps(request_body),
         auth=auth
     )
-    return await {client_oid:response.json()}
+    return {client_oid:response.json()}
 
 
 async def market_order(auth, session, side, product, size, unit):
@@ -123,7 +123,7 @@ async def cancel_order(auth, session, order_id):
         f"{env['GDAX_URL']}/orders/{order_id}",
         auth=auth
     )
-    return await response.status_code
+    return response.status_code
 
 
 aync def cancel_all(auth, session, product=None):
@@ -143,5 +143,5 @@ aync def cancel_all(auth, session, product=None):
         data=dumps(req_body),
         auth=auth
     )
-    return await response.status_code
+    return response.status_code
 
