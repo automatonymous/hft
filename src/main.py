@@ -1,16 +1,16 @@
-from src.data_structures import MsgQueue
-from src.order_book import OrderBook
-from src.strategies.print_stuff import PrintStuff
+from src.data_structures import TickerQueue, UserMatchQueue
+from src.channels import Channel
+from src.strategies.trailing_stop import TrailingStop
 from src.trader import Trader
 
 
-def trade():
-    q = MsgQueue()
-    ob = OrderBook(q, products=['BTC-USD'], channels=['level2'])
-    strat = PrintStuff(q)
-    trader = Trader(q, ob, strat)
+def trailing_stop(product):
+    q = TickerQueue()
+    ch = Channel(q, products=[product], channels=['ticker'])
+    strat = TrailingStop(q, product)
+    trader = Trader(ch, strat)
     trader.run()
 
 if __name__ == '__main__':
-    trade()
+    trailing_stop('BTC-USD')
 

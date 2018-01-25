@@ -26,7 +26,7 @@ async def place_order(auth, session, **kwargs):
         data=dumps(request_body),
         auth=auth
     )
-    return {client_oid:response.json()}
+    return (client_oid, response.json())
 
 
 async def market_order(auth, session, side, product, size, unit):
@@ -126,7 +126,7 @@ async def cancel_order(auth, session, order_id):
     return response.status_code
 
 
-aync def cancel_all(auth, session, product=None):
+async def cancel_all(auth, session, product=None):
     """Cancels all orders, or all for a given product
 
     Args:
@@ -137,11 +137,32 @@ aync def cancel_all(auth, session, product=None):
     Returns:
       int : Status code, e.g. 200
     """
-    req_body = {product_id: product} if product else {}
+    req_body = {'product_id': product} if product else {}
     response = await session.delete(
         f"{env['GDAX_URL']}/orders",
         data=dumps(req_body),
         auth=auth
     )
     return response.status_code
+
+
+async def list_orders(auth, session, product=None):
+    """Lists all orders, or all for a given product
+
+    Args:
+      auth -> CoinBaseExchangeAuth : A coinbase exchange auth object
+      session -> aiohttp.ClientSession : An aiohttp client session
+      product -> str or None : A particular currency for which to list orders
+
+    Returns:
+      list : Currently active orders
+    """
+    req_body = {'product_id': product} if product else {}
+    req_body.update({'status': 'all'})
+    response = await session.get(
+        f"{env['GDAX_URL']}/orders",
+        data=dumps(req_body),
+        auth=auth
+    )
+    return [x['id'] for x in response.json()]
 

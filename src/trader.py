@@ -3,12 +3,14 @@ from threading import Thread
 
 
 class Trader:
-    def __init__(self, q, book, strat):
-        self.q = q
-        self.ob = book
+    def __init__(self, channels, strat):
+        self.ch = channels
         self.strat = strat
-        self.funx = (
-            self.ob.listen,
+        if isinstance(self.ch, list):
+            self.funx = [x.listen for x in self.ch]
+        else:
+            self.funx = [self.ch.listen]
+        self.funx.append(
             self.strat.activate,
         )
 

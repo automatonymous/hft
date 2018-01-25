@@ -8,15 +8,16 @@ class Strategy:
     async def stream_processor(self):
         raise NotImplementedError
 
-    def __init__(self, queue):
+    def __init__(self, queues, product):
         self.stop = False
         self.auth = CoinbaseExchangeAuth()
-        self.queue = queue
+        self.queues = queues
+        self.product = None
+        self.name = None
 
     async def activate(self):
         async with aiohttp.ClientSession() as self.session:
             await self.stream_processor()
-
 
     async def kill(self, product=None):
         await log('Cancelling all orders')
