@@ -1,6 +1,5 @@
 from src.authorization import CoinbaseExchangeAuth
 from os import environ as env
-from utils.logger import log
 import requests
 
 
@@ -21,7 +20,6 @@ def get_position(currency):
       str: Current balance of given currency
     """
     pos = gets('position')['accounts'][currency]['balance']
-    log(pos)
     return pos
 
 
