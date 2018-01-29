@@ -32,7 +32,7 @@ class Channel:
                     if not self.alive: break
                     await self.queue.push(loads(message))
                     cycles += 1
-                    if cycles % 30 == 0:
+                    if cycles % 300 == 0:
                         websocket.ping('keepalive')
                         await log(
                             f'{self.channels} --- Still alive asof {cycles}'

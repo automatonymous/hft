@@ -1,5 +1,4 @@
 from utils.logger import log
-from src.authorization import CoinbaseExchangeAuth
 import asyncio
 import aiohttp
 
@@ -10,7 +9,6 @@ class Strategy:
 
     def __init__(self, queues, product):
         self.stop = False
-        self.auth = CoinbaseExchangeAuth()
         self.queues = queues
         self.product = None
         self.name = None

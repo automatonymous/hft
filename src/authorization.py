@@ -33,6 +33,23 @@ class CoinbaseExchangeAuth(AuthBase):
         return request
 
 
+def aiohttp_auth_headers(method, body):
+    timestamp = str(time.time())
+    message = ( timestamp + method + env['GDAX_URL'] + body )
+    message = message.encode('ascii')
+    hmac_key = base64.b64decode(env['GDAX_SECRET'])
+    assert len(hmac_key) == 64
+    signature = hmac.new(hmac_key, message, hashlib.sha256)
+    signature_b64 = base64.b64encode(signature.digest())
+    return {
+        'CB-ACCESS-SIGN': signature_b64.decode('ascii'),
+        'CB-ACCESS-TIMESTAMP': timestamp,
+        'CB-ACCESS-KEY': env['GDAX_KEY'],
+        'CB-ACCESS-PASSPHRASE': env['GDAX_PASSPHRASE'],
+        'Content-Type': 'application/json',
+    }
+
+
 def get_auth_dict():
     timestamp = str(time.time())
     message = ( timestamp + 'GET' + '/users/self/verify' )
@@ -47,6 +64,7 @@ def get_auth_dict():
         passphrase = env['GDAX_PASSPHRASE'],
         timestamp = timestamp
     )
+
 
 if __name__ == '__main__':
     print(get_auth_dict())
