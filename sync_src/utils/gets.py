@@ -1,4 +1,4 @@
-from authorization import CoinbaseExchangeAuth
+from sync_src.authorization import CoinbaseExchangeAuth
 from os import environ as env
 import requests
 

@@ -1,5 +1,6 @@
-import hmac, time, base64, hashlib
+import hmac, base64, hashlib
 from requests.auth import AuthBase
+import requests
 from os import environ as env
 
 
@@ -10,7 +11,7 @@ class CoinbaseExchangeAuth(AuthBase):
         self.passphrase = env['GDAX_PASSPHRASE']
 
     def __call__(self, request):
-        timestamp = str(time.time())
+        timestamp = str(_server_time_())
         message = (
             timestamp +
             request.method +
@@ -34,7 +35,7 @@ class CoinbaseExchangeAuth(AuthBase):
 
 
 def get_auth_dict():
-    timestamp = str(time.time())
+    timestamp = str(_server_time_())
     message = ( timestamp + 'GET' + '/users/self/verify' )
     message = message.encode('ascii')
     hmac_key = base64.b64decode(env['GDAX_SECRET'])
@@ -47,6 +48,10 @@ def get_auth_dict():
         passphrase = env['GDAX_PASSPHRASE'],
         timestamp = timestamp
     )
+
+
+def _server_time_():
+    return requests.get(env['GDAX_URL'] + 'time').json()['epoch']
 
 
 if __name__ == '__main__':
